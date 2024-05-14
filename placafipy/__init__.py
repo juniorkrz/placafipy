@@ -1,4 +1,4 @@
-# https://github.com/juniorkrz/fipy
+# https://github.com/juniorkrz/placafipy
 
 __version__ = "1.0.0"
 __author__ = "Antônio Roberto Júnior"
@@ -12,7 +12,7 @@ from random import choice as random_choice
 from urllib.parse import urlencode as urllib_url_encode
 
 
-class FiPy():
+class PlacaFipy():
 
 
     ESTADOS = {
@@ -48,7 +48,7 @@ class FiPy():
 
     @staticmethod
     def obter_estado(sigla):
-        return FiPy.ESTADOS.get(sigla.upper())
+        return PlacaFipy.ESTADOS.get(sigla.upper())
 
 
     @staticmethod
@@ -59,7 +59,7 @@ class FiPy():
     @staticmethod
     def converter_placa(placa):
         p = placa.lower()
-        if FiPy.verificar_placa_mercosul(p):
+        if PlacaFipy.verificar_placa_mercosul(p):
             return f"{placa[:-3]}{str(ascii_lowercase.find(p[4]))}{placa[-2:]}".upper()
         else:
             return f"{placa[:-3]}{ascii_lowercase[int(p[4])]}{placa[-2:]}".upper()

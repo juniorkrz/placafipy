@@ -1,6 +1,6 @@
-# FiPy
+# PlacaFipy
 
-FiPy é uma biblioteca Python que permite realizar consultas FIPE pela placa do veículo.
+PlacaFipy é uma biblioteca Python que permite realizar consultas FIPE pela placa do veículo.
 
 ## Funcionalidades
 
@@ -11,7 +11,7 @@ FiPy é uma biblioteca Python que permite realizar consultas FIPE pela placa do 
 
 ## Obtenha um API Token em ScrapingAnt
 
-Para usar o FiPy, é necessário um token de API do ScrapingAnt para contornar verificações anti-webscraping.
+Para usar o PlacaFipy, é necessário um token de API do ScrapingAnt para contornar verificações anti-webscraping.
 
 O ScrapingAnt fornece 1.000 consultas gratuitas por mês.
 
@@ -22,36 +22,36 @@ Você pode criar uma conta em [ScrapingAnt][scrapingant] e obter seu token API l
 Você pode instalar este pacote via pip:
 
 ```bash
-pip install fipy
+pip install placafipy
 ```
 
 ## Como utilizar
 
 ```python
-from fipy import FiPy
+from placafipy import PlacaFipy
 
-# Crie uma instância do FiPy passando uma lista com os tokens do ScrapingAnt como parâmetros. Você pode adicionar quantos tokens forem necessários.
+# Crie uma instância do PlacaFipy passando uma lista com os tokens do ScrapingAnt como parâmetros. Você pode adicionar quantos tokens forem necessários.
 tokens = ["SEU_TOKEN_1", "SEU_TOKEN_2", "SEU_TOKEN_3"]
-fipy = FiPy(tokens)
+placafipy = PlacaFipy(tokens)
 
 # Obter o estado a partir da sigla
-estado = fipy.obter_estado('PE')
+estado = placafipy.obter_estado('PE')
 print(estado)  # Saída: PERNAMBUCO
 
 # Verificar se uma placa é do modelo Mercosul
-placa_mercosul = fipy.verificar_placa_mercosul('ABC1C34')
+placa_mercosul = placafipy.verificar_placa_mercosul('ABC1C34')
 print(placa_mercosul)  # Saída: True
 
 # Conversão de placas
-placa_convertida = fipy.converter_placa('ABC1234')
+placa_convertida = placafipy.converter_placa('ABC1234')
 print(placa_convertida)  # Saída: ABC1C34
 
-placa_convertida = fipy.converter_placa('ABC1C34')
+placa_convertida = placafipy.converter_placa('ABC1C34')
 print(placa_convertida)  # Saída: ABC1234
 
 # Consultar informações de um veículo pela placa
 placa = "ABC1234"
-informacoes_veiculo = fipy.consulta(placa)
+informacoes_veiculo = placafipy.consulta(placa)
 
 if informacoes:
     print(informacoes)
