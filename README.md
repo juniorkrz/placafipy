@@ -53,8 +53,8 @@ print(placa_convertida)  # Saída: ABC1234
 placa = "ABC1234"
 informacoes_veiculo = placafipy.consulta(placa)
 
-if informacoes:
-    print(informacoes)
+if informacoes_veiculo:
+    print(informacoes_veiculo)
 else:
     print("Não foi possível obter informações para a placa especificada.")
 ```
