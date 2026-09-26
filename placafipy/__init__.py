@@ -1,6 +1,6 @@
 # https://github.com/juniorkrz/placafipy
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __author__ = "Antônio Roberto Júnior"
 
 
@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from unidecode import unidecode
 from string import ascii_lowercase
 from requests import get as requests_get
-from random import choice as random_choice
+from random import sample as random_sample
 from urllib.parse import urlencode as urllib_url_encode
 
 
@@ -69,6 +69,16 @@ class PlacaFipy():
         self.__tokens = tokens
         self.__sa_api_url = 'https://api.scrapingant.com/v2/general'
         self.__placa_fipe_url = "https://placafipe.com/placa/%s"
+        self.__frases_erro = [
+                        "tem um formato inválido",
+                        "não foi encontrada informação para a placa",
+                        ]
+
+
+    @staticmethod
+    def __obter_src(imagem):
+        # O site trocou o lazyload: a imagem principal vem só com "src"
+        return imagem.attrs.get("data-src") or imagem.attrs.get("src") or False
 
 
     def __preparar_consulta(self, placa):
@@ -83,21 +93,26 @@ class PlacaFipy():
 
     def __obter_placa_fipe_html(self):
         fipe_url = self.__placa_fipe_url % self.__placa
-        params = {'url': fipe_url, 'x-api-key': random_choice(self.__tokens)}
-        url = f'{self.__sa_api_url}?{urllib_url_encode(params)}'
-        resposta = requests_get(url)
-        if resposta.status_code != 200:
-            return False
-        self.__html = resposta.text
-        return True
+        # Tenta os tokens em ordem aleatória: um token bloqueado (ex.: 423) ou
+        # uma resposta sem a página da placa não derruba a consulta.
+        for token in random_sample(self.__tokens, len(self.__tokens)):
+            params = {'url': fipe_url, 'x-api-key': token}
+            url = f'{self.__sa_api_url}?{urllib_url_encode(params)}'
+            try:
+                resposta = requests_get(url, timeout=120)
+            except Exception:
+                continue
+            if resposta.status_code != 200:
+                continue
+            html = resposta.text.lower()
+            if "fipetablepricedetail" in html or any(f in html for f in self.__frases_erro):
+                self.__html = resposta.text
+                return True
+        return False
 
 
     def __verificar_consulta(self):
-        frases_erro = [
-                        "tem um formato inválido",
-                        "não foi encontrada informação para a placa",
-                        ]
-        for frase in frases_erro:
+        for frase in self.__frases_erro:
             if frase in self.__html.lower():
                 return False
         return True
@@ -111,7 +126,7 @@ class PlacaFipy():
     def __obter_imagem_logo_url(self):
         imagem_logo = self.__soup.find("img", {"class": "fipeLogoDIV"})
         if imagem_logo:
-            imagem_logo_url = imagem_logo.attrs["data-src"]
+            imagem_logo_url = self.__obter_src(imagem_logo)
             self.__consulta["imagem_logo_url"] = imagem_logo_url
             return True
         self.__consulta["imagem_logo_url"] = False
@@ -121,7 +136,7 @@ class PlacaFipy():
     def __obter_imagem_placa_url(self):
         imagem_placa = self.__soup.find("img", {"class": "fipe-placa"})
         if imagem_placa:
-            imagem_placa_url = imagem_placa.attrs["data-src"]
+            imagem_placa_url = self.__obter_src(imagem_placa)
             self.__consulta["imagem_placa_url"] = imagem_placa_url
             return True
         self.__consulta["imagem_placa_url"] = False
@@ -130,6 +145,8 @@ class PlacaFipy():
 
     def __obter_detalhes(self):
         tabela_detalhes = self.__soup.find("table", {"class": "fipeTablePriceDetail"})
+        if not tabela_detalhes:
+            return False
         linhas_tabela = tabela_detalhes.find_all("tr")
 
         for linha in linhas_tabela:
@@ -238,7 +255,8 @@ class PlacaFipy():
             self.__obter_soup()
             self.__obter_imagem_logo_url()
             self.__obter_imagem_placa_url()
-            self.__obter_detalhes()
+            if not self.__obter_detalhes():
+                return False
             self.__tratar_parametros()
             self.__obter_valores_fipe()
             self.__obter_valores_ipva()

@@ -9,7 +9,7 @@ long_description = (this_directory / "README.md").read_text(encoding='utf-8')
 
 setup(
     name='PlacaFipy',
-    version="1.0.3",
+    version="1.0.4",
     packages=['placafipy'],
     install_requires=[
         'beautifulsoup4==4.12.3',
