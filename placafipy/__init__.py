@@ -1,6 +1,6 @@
 # https://github.com/juniorkrz/placafipy
 
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 __author__ = "Antônio Roberto Júnior"
 
 
@@ -72,6 +72,8 @@ class PlacaFipy():
         self.__frases_erro = [
                         "tem um formato inválido",
                         "não foi encontrada informação para a placa",
+                        "não encontramos a placa",
+                        "página não encontrada",
                         ]
 
 
@@ -83,7 +85,8 @@ class PlacaFipy():
 
     def __preparar_consulta(self, placa):
         self.__soup = None
-        self.__placa = placa
+        # O site só reconhece a placa em maiúsculas (em minúsculas dá "Página não encontrada")
+        self.__placa = "".join(c for c in placa if c.isalnum()).upper()
         self.__html = None
         self.__consulta = {
                             "tabela_fipe": {},
